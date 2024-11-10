@@ -179,31 +179,32 @@ def sankey_from_keterangan_status(dfx, nomor_uu):
 # Load the data
 @st.cache_data
 def load_data():
-    return pd.read_csv('jdih_data_cleaning.csv')
+    return pd.read_csv('data/jdih_data_cleaning.csv')
 
 data = load_data()
 
 st.title("Pemantauan Perubahan Hukum: Analisis Data dari JDIH KESDM")
-st.write("""Dashboard ini memvisualisasikan perubahan regulasi di sektor energi dan sumber daya mineral berdasarkan data dari JDIH KESDM. Melalui visualisasi yang disediakan, dapat memudahkan dalam melihat alur perubahan pada peraturan, termasuk penghapusan, revisi, atau adopsi regulasi baru. Filter interaktif membantu eksplorasi berdasarkan Bentuk Peraturan dan Nomor Undang-undang.""")
+st.write("""Dashboard ini memvisualisasikan perubahan regulasi di sektor energi dan 
+         sumber daya mineral berdasarkan data dari JDIH KESDM. Melalui visualisasi 
+         yang disediakan, dapat memudahkan dalam melihat alur perubahan pada 
+         peraturan, termasuk penghapusan, revisi, atau adopsi regulasi baru. Filter 
+         interaktif membantu eksplorasi berdasarkan Bentuk Peraturan dan Nomor Undang-undang.""")
 
-# Sidebar for filter
-st.sidebar.title("Filter Data")
-tipe_dokumen_options = tipe_dokumen_options = ['Tampilkan Semua'] + data['Singkatan Jenis / Bentuk Peraturan'].unique().tolist()
-tipe_dokumen = st.sidebar.selectbox('Pilih Bentuk Peraturan', tipe_dokumen_options)
-
-if tipe_dokumen == 'Tampilkan Semua':
+tipe_dokumen = st.selectbox('Pilih Bentuk Peraturan', ['Semua'] + data['Singkatan Jenis / Bentuk Peraturan'].unique().tolist())
+if tipe_dokumen == 'Semua':
     filtered_data = data 
 else:
     filtered_data = data[data['Singkatan Jenis / Bentuk Peraturan'] == tipe_dokumen]
-nomor_uu_options = filtered_data['Nomor Peraturan'].unique().tolist()
-nomor_uu = st.sidebar.selectbox('Pilih Nomor UU', nomor_uu_options)
 
-st.sidebar.markdown("---")
+nomor_uu = st.selectbox('Pilih Nomor UU', filtered_data['Nomor Peraturan'].unique().tolist())
 
-# Showing data on tabs
-tab1, tab2, tab3 = st.tabs(["📊 Data Tabel", "📉 Sankey Diagram", "📈 Deskripsi Data"])
+# diubah
+# Sidebar for filter
+st.sidebar.title("Navigasi Menu")
 
-with tab1:
+menu = st.sidebar.radio("Pilih Halaman:", 
+                        ["📊 Data Tabel", "📉 Sankey Diagram", "📈 Deskripsi Data"])
+if menu == "📊 Data Tabel":
     filtered_data = filtered_data.reset_index(drop=True)
     filtered_data.index += 1
     if tipe_dokumen == 'Tampilkan Semua':
@@ -212,7 +213,7 @@ with tab1:
         st.write(f"### Data {tipe_dokumen}")
     st.write(filtered_data)
 
-with tab2:
+elif menu == "📉 Sankey Diagram":
     selected_data = data[data['Nomor Peraturan'] == nomor_uu]
     if 'Singkatan Jenis / Bentuk Peraturan' in selected_data.columns and 'Nomor Peraturan' in selected_data.columns:
         bentuk_peraturan = selected_data['Singkatan Jenis / Bentuk Peraturan'].iloc[0]
@@ -255,7 +256,7 @@ with tab2:
     else:
         st.write("Keterangan status tidak tersedia.")
 
-with tab3:
+elif menu == "📈 Deskripsi Data":
     st.write("### Deskripsi Data")
     # st.write(data.describe())
     st.write("Tabel data terdiri dari:")

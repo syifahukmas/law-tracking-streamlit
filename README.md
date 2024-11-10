@@ -35,11 +35,11 @@ Daftar kebutuhan sistem untuk menjalankan proyek ini:
 Langkah-langkah instalasi proyek:
 1. Clone repositori:
     ```bash
-    git clone https://github.com/username/nama-proyek.git
+    git clone https://github.com/syifahukmas/law-tracking-streamlit.git
     ```
 2. Masuk ke direktori proyek:
     ```bash
-    cd nama-proyek
+    cd law-tracking-streamlit
     ```
 3. Install dependensi yang diperlukan:
     ```bash

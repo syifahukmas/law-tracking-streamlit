@@ -49,7 +49,7 @@ streamlit run app.py
 ```
 
 ## Struktur Proyek
-
+```
 ├── data/
 ├── app/
 │   ├── __init__.py
@@ -57,3 +57,4 @@ streamlit run app.py
 │   └── utils.py
 ├── README.md
 └── requirements.txt
+```

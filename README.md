@@ -8,6 +8,7 @@ Proyek ini membuat sebuah dashboard interaktif yang dikembangkan dengan Streamli
 - [Instalasi](#instalasi)
 - [Penggunaan](#penggunaan)
 - [Struktur Proyek](#struktur-proyek)
+- [Kontibutor](#kontributor)
 
 ---
 
@@ -58,3 +59,8 @@ streamlit run app.py
 ├── README.md
 └── requirements.txt
 ```
+
+## Kontributor
+1. Riyandi Banovbi Putera Irsal
+2. Syifa' Hukma Shaiyya
+3. Edi Sugiarto

@@ -39,6 +39,16 @@ st.sidebar.title("Navigasi Menu")
 
 menu = st.sidebar.radio("Pilih Halaman:", 
                         ["📊 Data Tabel", "📉 Sankey Diagram", "📈 Deskripsi Data"])
+
+st.sidebar.markdown("### Kontributor:")
+contributors = [
+    "1. Riyandi Banovbi Putera Irsal",
+    "2. Syifa' Hukma Shaiyya",
+    "3. Edi Sugiarto"
+]
+for contributor in contributors:
+    st.sidebar.write(contributor)
+
 if menu == "📊 Data Tabel":
     filtered_data = filtered_data.reset_index(drop=True)
     filtered_data.index += 1

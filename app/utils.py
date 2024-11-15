@@ -151,7 +151,26 @@ def sankey_from_keterangan_status(dfx, nomor_uu):
 
     st.text("Descriptions for each index:")
     st.text(descriptions)
+    # Add legend for node colors
+    legend_labels = list(color_mapping.keys())
+    legend_colors = list(color_mapping.values())
     
+    # Create a dummy scatter plot for the legend without markers
+    for label, color in zip(legend_labels, legend_colors):
+        fig.add_trace(go.Scatter(
+            x=[None], y=[None],
+            mode='lines',  # Change to lines to avoid marker background
+            line=dict(color=color, width=10),  # Set line color and width for visibility
+            name=label,
+            showlegend=True
+        ))
+    
+    fig.update_layout(showlegend=True,
+                      xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),  # Remove x-axis grid and ticks
+                      yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),  # Remove y-axis grid and ticks
+                      paper_bgcolor='rgba(0,0,0,0)',  # Make the paper background transparent
+                      plot_bgcolor='rgba(0,0,0,0)'    # Make the plot background transparent
+    )
     # Display the Sankey diagram
     st.plotly_chart(fig)
 

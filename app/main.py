@@ -45,7 +45,8 @@ def sankey_from_keterangan_status(dfx, nomor_uu):
     sources = []
     targets = []
     labels = []
-    unique_labels = set()  
+    unique_labels = {}  # Dictionary to map labels to their descriptions
+    label_counter = 1  # Start from index 1, as 0 will be reserved for the regulation
 
     filtered_df = dfx[dfx['Nomor Peraturan'] == nomor_uu]
 
@@ -58,9 +59,10 @@ def sankey_from_keterangan_status(dfx, nomor_uu):
     bentuk_peraturan = filtered_df['Singkatan Jenis / Bentuk Peraturan'].values[0]
     nomor_peraturan = filtered_df['Nomor Peraturan'].values[0]
 
-    # Create the first node
+    # Create the first node with index 0
     first_node = f"{bentuk_peraturan} - {nomor_peraturan}"
-    unique_labels.add(first_node)
+    unique_labels[0] = first_node  # Index 0 will hold the regulation details
+    prev_node = 0  # Start from node index 0
 
     # Weights for the first words
     weight_dict = {
@@ -68,43 +70,42 @@ def sankey_from_keterangan_status(dfx, nomor_uu):
         "Dicabut": 10,
         "Mencabut": 15,
         "Mengubah": 20
-        # Add more words and weights as needed
     }
-
-    prev_node = first_node  # Set prev_node to the first node
 
     for changes in filtered_df['Keterangan_Status']:
         first_statements = extract_first_statement(changes)
         for statement in first_statements:
-            if statement not in unique_labels:
+            if statement not in unique_labels.values():
+                unique_labels[label_counter] = statement
                 sources.append(prev_node)
-                targets.append(statement)
-                unique_labels.add(statement)
-                prev_node = statement
+                targets.append(label_counter)
+                prev_node = label_counter
+                label_counter += 1
         
         statements_after_semicolon = extract_statements_after_semicolon(changes)
         for statement in statements_after_semicolon:
-            if statement not in unique_labels:
+            if statement not in unique_labels.values():
+                unique_labels[label_counter] = statement
                 sources.append(prev_node)
-                targets.append(statement)
-                unique_labels.add(statement)
-                prev_node = statement
+                targets.append(label_counter)
+                prev_node = label_counter
+                label_counter += 1
 
     if len(targets) == 0:
         st.write("Tidak ada perubahan yang terdaftar.")
         return
 
-    label_list = list(unique_labels)
+    label_list = list(unique_labels.keys())
     label_map = {label: idx for idx, label in enumerate(label_list)}
     
-    source_indices = [label_map[src] for src in sources]
-    target_indices = [label_map[tgt] for tgt in targets]
+    source_indices = [src for src in sources]
+    target_indices = [tgt for tgt in targets]
 
     # Get weights for each link based on the first word
     values = []
-    for target in targets:
-        first_word = target.split()[0]
-        # Get weight based on the first word, default to 10 if not found
+    for target in target_indices:
+        statement = unique_labels[target]
+        first_word = statement.split()[0]  # Use the first word for weight mapping
         values.append(weight_dict.get(first_word, 10))  # Default weight if not found
 
     # Define colors for node colors based on the first word
@@ -116,7 +117,7 @@ def sankey_from_keterangan_status(dfx, nomor_uu):
     }
 
     node_colors = []
-    for label in label_list:
+    for label in unique_labels.values():
         first_word = label.split()[0]  # Get the first word for color mapping
         node_colors.append(color_mapping.get(first_word, "grey"))  # Default color if not found
 
@@ -130,9 +131,9 @@ def sankey_from_keterangan_status(dfx, nomor_uu):
 
     # Create the list of link colors
     link_colors = []
-    for target in targets:
-        first_word = target.split()[0]
-        # Get the corresponding color from the mapping
+    for target in target_indices:
+        statement = unique_labels[target]
+        first_word = statement.split()[0]
         link_colors.append(link_color_mapping.get(first_word, "grey"))
 
     # Create Sankey Diagram
@@ -141,7 +142,7 @@ def sankey_from_keterangan_status(dfx, nomor_uu):
             pad=15,
             thickness=30,
             line=dict(color="black", width=0.5),
-            label=label_list,
+            label=[str(idx) for idx in unique_labels.keys()],  # Use indices as labels
             color=node_colors  # Set node colors
         ),
         link=dict(
@@ -152,29 +153,17 @@ def sankey_from_keterangan_status(dfx, nomor_uu):
         )
     ))
 
-    # Add legend for node colors
-    legend_labels = list(color_mapping.keys())
-    legend_colors = list(color_mapping.values())
+    # Display descriptions for each index
+    descriptions = "\n".join([f"{idx}: {desc}" for idx, desc in unique_labels.items()])
+
+    st.text("Descriptions for each index:")
+    st.text(descriptions)
     
-    # Create a dummy scatter plot for the legend without markers
-    for label, color in zip(legend_labels, legend_colors):
-        fig.add_trace(go.Scatter(
-            x=[None], y=[None],
-            mode='lines',  # Change to lines to avoid marker background
-            line=dict(color=color, width=10),  # Set line color and width for visibility
-            name=label,
-            showlegend=True
-        ))
-    
-    fig.update_layout(showlegend=True,
-                      xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),  # Remove x-axis grid and ticks
-                      yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),  # Remove y-axis grid and ticks
-                      paper_bgcolor='rgba(0,0,0,0)',  # Make the paper background transparent
-                      plot_bgcolor='rgba(0,0,0,0)'    # Make the plot background transparent
-                      )
-    
-    # fig.update_layout(title_text=f"Sankey Diagram of Changes for Regulation {nomor_uu}", font_size=10)
+    # Display the Sankey diagram
     st.plotly_chart(fig)
+
+
+
 
 # Load the data
 @st.cache_data

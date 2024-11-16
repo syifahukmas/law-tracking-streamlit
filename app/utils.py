@@ -149,7 +149,7 @@ def sankey_from_keterangan_status(dfx, nomor_uu):
     # Display descriptions for each index
     descriptions = "\n".join([f"{idx}: {desc}" for idx, desc in unique_labels.items()])
 
-    st.text("Descriptions for each index:")
+    st.text("Deskripsi untuk setiap indeks:")
     st.text(descriptions)
     # Add legend for node colors
     legend_labels = list(color_mapping.keys())
